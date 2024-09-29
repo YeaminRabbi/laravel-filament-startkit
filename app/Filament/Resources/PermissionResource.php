@@ -12,18 +12,25 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use App\Filament\Clusters\RolePermissionCluster;
 class PermissionResource extends Resource
 {
     protected static ?string $model = Permission::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $cluster = RolePermissionCluster::class;
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                //
+                Forms\Components\TextInput::make('name')
+                ->label('Permission Name')
+                ->required()
+                ->unique(ignoreRecord: true), // Ensure the name is unique
             ]);
     }
 
@@ -31,19 +38,27 @@ class PermissionResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('name')
+                ->label('Role Name')
+                ->sortable()
+                ->searchable(),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->date(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])->defaultSort('id', 'desc');
     }
 
     public static function getRelations(): array
