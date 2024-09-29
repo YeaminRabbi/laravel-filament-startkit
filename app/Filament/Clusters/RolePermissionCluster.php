@@ -8,5 +8,5 @@ class RolePermissionCluster extends Cluster
 {
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static ?string $clusterBreadcrumb = 'cluster';
+    protected static ?string $clusterBreadcrumb = 'Role & Permission';
 }
