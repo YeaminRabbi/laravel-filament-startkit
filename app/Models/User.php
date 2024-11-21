@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'status',
         'image',
+        'phone',
+        'address',
     ];
 
     /**
@@ -45,4 +47,8 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function getImage(){
+        return 'contents/'.$this->image;
+    }
 }

@@ -27,24 +27,38 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255),
+
+            Forms\Components\TextInput::make('email')
+                ->required()
+                ->email()
+                ->maxLength(255)
+                ->unique(User::class, 'email', ignoreRecord: true),
+            
+            Forms\Components\TextInput::make('phone')
                 ->required(),
-                
-                Forms\Components\TextInput::make('email')
+            Forms\Components\TextInput::make('address')
                 ->required(),
 
-                Forms\Components\TextInput::make('password')
+            Forms\Components\TextInput::make('password')
                 ->password()
-                ->dehydrateStateUsing(fn ($state) => filled($state) ? bcrypt($state) : null)
-                ->required(fn ($livewire) => $livewire instanceof Pages\CreateUser) // Only required on create
-                ->nullable(fn ($livewire) => $livewire instanceof Pages\EditUser), // Optional on edit
+                ->dehydrateStateUsing(fn ($state) => bcrypt($state))
+                ->required(fn (string $context) => $context === 'create'),
 
-                FileUpload::make('image')
+            Forms\Components\MultiSelect::make('roles')
+                ->relationship('roles', 'name')
+                ->preload()
+                ->required(),
+
+            FileUpload::make('image')
                 ->disk('local')
                 ->directory('user')
                 ->image()
                 ->imageEditor()
-                ->required(),
+                ->required()
+                ->columnSpan('full'),
             ]);
     }
 
@@ -54,24 +68,14 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\ImageColumn::make('image')->label('User Image')
                 ->getStateUsing(function (User $record): string {
-                    return asset($record->image);
+                    return asset($record->getImage());
                 })
                 ->size(100),
-
-                Tables\Columns\TextColumn::make('name')
-                    ->label('Name')
-                    ->sortable()
-                    ->searchable(),
-                
-                Tables\Columns\TextColumn::make('email')
-                    ->label('Email')
-                    ->sortable()
-                    ->searchable(),
-                
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Created At')
-                    ->date()
-
+                Tables\Columns\TextColumn::make('name')->searchable(),
+                Tables\Columns\TextColumn::make('email')->searchable(),
+                Tables\Columns\TextColumn::make('roles.name')->label('Roles'),
+                Tables\Columns\TextColumn::make('created_at')->dateTime(),
+                Tables\Columns\TextColumn::make('updated_at')->dateTime(),
             ])
             ->filters([
                 //
@@ -84,7 +88,7 @@ class UserResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
-            ])->defaultSort('id', 'desc');
+            ]);
     }
 
     public static function getRelations(): array

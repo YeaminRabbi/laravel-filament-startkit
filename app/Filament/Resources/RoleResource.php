@@ -4,7 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\RoleResource\Pages;
 use App\Filament\Resources\RoleResource\RelationManagers;
-use App\Models\Role;
+use Spatie\Permission\Models\Role;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -27,11 +27,23 @@ class RoleResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('Role Name')
-                    ->required()
-                    ->unique(ignoreRecord: true), // Ensure the name is unique
+             ->schema([
+                Forms\Components\Group::make()
+                    ->columnSpan('full')
+                    ->schema([
+                        Forms\Components\Section::make()
+                            ->columns(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Role Name')
+                                    ->required()
+                                    ->unique(ignoreRecord: true), // Ensure the name is unique
+
+                                Forms\Components\MultiSelect::make('permissions')
+                                    ->relationship('permissions', 'name')
+                                    ->preload(),
+                            ]),
+                    ]),
             ]);
     }
 

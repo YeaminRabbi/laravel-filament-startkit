@@ -32,8 +32,9 @@ return [
         
         'local' => [
             'driver' => 'local',
-            'root' => public_path('/'),
+            'root' => public_path('/contents/'),
             'visibility' => 'public',
+            'url' => env('APP_URL').'/contents/',
             'throw' => false,
         ],
 
